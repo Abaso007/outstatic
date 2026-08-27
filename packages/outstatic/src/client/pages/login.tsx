@@ -97,6 +97,7 @@ export default function Login({
     if (isLoading) return
 
     setLoadingProvider('github')
+    let isRedirecting = false
 
     try {
       const response = await fetch(`${apiBasePath}/login`)
@@ -112,6 +113,7 @@ export default function Login({
       }
 
       if (data && typeof data.url === 'string') {
+        isRedirecting = true
         router.push(data.url)
         return
       }
@@ -124,7 +126,9 @@ export default function Login({
     } catch {
       navigateToError('github-relay-failed', true)
     } finally {
-      setLoadingProvider(null)
+      if (!isRedirecting) {
+        setLoadingProvider(null)
+      }
     }
   }
 
@@ -138,6 +142,7 @@ export default function Login({
     if (isLoading) return
 
     setLoadingProvider('google')
+    let isRedirecting = false
 
     try {
       const response = await fetch(`${apiBasePath}/google-login`, {
@@ -159,6 +164,7 @@ export default function Login({
       }
 
       if (data && typeof data.url === 'string') {
+        isRedirecting = true
         router.push(data.url)
         return
       }
@@ -171,7 +177,9 @@ export default function Login({
     } catch {
       navigateToError('google-relay-failed')
     } finally {
-      setLoadingProvider(null)
+      if (!isRedirecting) {
+        setLoadingProvider(null)
+      }
     }
   }
 

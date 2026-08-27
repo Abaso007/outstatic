@@ -227,6 +227,10 @@ describe('<Login />', () => {
         'https://outstatic.com/api/outstatic/auth/github-exchange?token=abc'
       )
     })
+
+    const githubButton = screen.getByRole('link', { name: /signing in/i })
+    expect(githubButton).toHaveAttribute('aria-busy', 'true')
+    expect(githubButton.querySelector('svg.animate-spin')).toBeInTheDocument()
   })
 
   it('pushes backend Google login URL when request succeeds', async () => {
@@ -251,6 +255,10 @@ describe('<Login />', () => {
         'https://outstatic.com/api/outstatic/auth/google-exchange?token=abc'
       )
     })
+
+    const googleButton = screen.getByRole('link', { name: /signing in/i })
+    expect(googleButton).toHaveAttribute('aria-busy', 'true')
+    expect(googleButton.querySelector('svg.animate-spin')).toBeInTheDocument()
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/cms/api/outstatic/google-login',
