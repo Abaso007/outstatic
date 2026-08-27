@@ -123,8 +123,29 @@ describe('<Login />', () => {
     expect(pushMock).not.toHaveBeenCalled()
 
     await waitFor(() => {
-      expect(githubButton.className).not.toContain('animate-pulse')
+      expect(githubButton).toHaveAttribute('aria-busy', 'false')
     })
+  })
+
+  it('shows a spinner while GitHub sign-in is pending', () => {
+    ;(global.fetch as jest.Mock).mockImplementationOnce(
+      () => new Promise(() => {})
+    )
+
+    render(<Login />)
+
+    fireEvent.click(
+      screen.getByRole('link', {
+        name: /sign in with github/i
+      })
+    )
+
+    const githubButton = screen.getByRole('link', {
+      name: /signing in/i
+    })
+
+    expect(githubButton).toHaveAttribute('aria-busy', 'true')
+    expect(githubButton.querySelector('svg.animate-spin')).toBeInTheDocument()
   })
 
   it('redirects known GitHub login errors to query string', async () => {
@@ -228,6 +249,27 @@ describe('<Login />', () => {
     )
   })
 
+  it('shows a spinner while Google sign-in is pending', () => {
+    ;(global.fetch as jest.Mock).mockImplementationOnce(
+      () => new Promise(() => {})
+    )
+
+    render(<Login isPro />)
+
+    fireEvent.click(
+      screen.getByRole('link', {
+        name: /sign in with google/i
+      })
+    )
+
+    const googleButton = screen.getByRole('link', {
+      name: /signing in/i
+    })
+
+    expect(googleButton).toHaveAttribute('aria-busy', 'true')
+    expect(googleButton.querySelector('svg.animate-spin')).toBeInTheDocument()
+  })
+
   it('shows the login configuration error when Google auth is not configured', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
@@ -302,5 +344,30 @@ describe('<Login />', () => {
     await waitFor(() => {
       expect(upgradeDialog).toHaveAttribute('data-open', 'true')
     })
+  })
+
+  it('shows a spinner while sending a magic link', () => {
+    ;(global.fetch as jest.Mock).mockImplementationOnce(
+      () => new Promise(() => {})
+    )
+
+    render(<Login isPro />)
+
+    fireEvent.change(screen.getByPlaceholderText(/enter your email/i), {
+      target: { value: 'editor@example.com' }
+    })
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: /send magic link/i
+      })
+    )
+
+    const emailButton = screen.getByRole('button', {
+      name: /sending/i
+    })
+
+    expect(emailButton).toBeDisabled()
+    expect(emailButton).toHaveAttribute('aria-busy', 'true')
+    expect(emailButton.querySelector('svg.animate-spin')).toBeInTheDocument()
   })
 })

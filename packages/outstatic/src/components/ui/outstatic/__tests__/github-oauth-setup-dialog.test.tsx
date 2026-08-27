@@ -43,13 +43,12 @@ describe('<GithubOAuthSetupDialog />', () => {
     expect(screen.getByText('Add the OAuth credentials')).toBeInTheDocument()
     expect(screen.getByText('Restart and sign in')).toBeInTheDocument()
     expect(
-      screen.getByText('Create a GitHub OAuth app for free self-hosting.')
+      screen.getByText(/Add your Client ID and Secret to/)
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/Outstatic Pro users can continue/i)
-    ).toHaveTextContent(
-      'Outstatic Pro users can continue using OUTSTATIC_API_KEY for managed sign-in and Pro features.'
-    )
+      screen.queryByText('Create a GitHub OAuth app for free self-hosting.')
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/Outstatic Pro users/i)).not.toBeInTheDocument()
     expect(
       screen.queryByText('OUTSTATIC_API_KEY=your_api_key_here')
     ).not.toBeInTheDocument()
