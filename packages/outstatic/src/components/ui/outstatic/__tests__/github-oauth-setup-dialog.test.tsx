@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
 import { GithubOAuthSetupDialog } from '../github-oauth-setup-dialog'
@@ -23,6 +23,12 @@ describe('<GithubOAuthSetupDialog />', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     window.history.pushState({}, '', '/')
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: jest.fn().mockResolvedValue(undefined)
+      }
+    })
   })
 
   it('renders the three-step GitHub OAuth setup guide', () => {
@@ -75,5 +81,56 @@ describe('<GithubOAuthSetupDialog />', () => {
     expect(
       screen.getByText('http://localhost/api/outstatic/callback')
     ).toBeInTheDocument()
+  })
+
+  it('copies the homepage, callback, and empty environment variables', async () => {
+    render(
+      <GithubOAuthSetupDialog open onOpenChange={jest.fn()} basePath="/cms" />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy homepage URL' }))
+
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        'http://localhost/'
+      )
+      expect(
+        screen.getByRole('button', { name: 'homepage URL copied' })
+      ).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Copy authorization callback URL'
+      })
+    )
+
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        'http://localhost/cms/api/outstatic/callback'
+      )
+      expect(
+        screen.getByRole('button', {
+          name: 'authorization callback URL copied'
+        })
+      ).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Copy environment variables'
+      })
+    )
+
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        'OST_GITHUB_ID=\nOST_GITHUB_SECRET='
+      )
+      expect(
+        screen.getByRole('button', {
+          name: 'environment variables copied'
+        })
+      ).toBeInTheDocument()
+    })
   })
 })

@@ -1,7 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRight, Github, KeyRound, RotateCw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  Github,
+  KeyRound,
+  RotateCw
+} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -25,6 +33,48 @@ type GithubOAuthSetupDialogProps = {
 const GITHUB_OAUTH_APP_URL = 'https://github.com/settings/applications/new'
 const GITHUB_AUTH_DOCS_URL =
   'https://outstatic.com/docs/access-integration/setting-up-github-authentication'
+
+function CopyValueButton({ value, label }: { value: string; label: string }) {
+  const [isCopied, setIsCopied] = useState(false)
+
+  useEffect(() => {
+    if (!isCopied) return
+
+    const timeoutId = window.setTimeout(() => setIsCopied(false), 1500)
+    return () => window.clearTimeout(timeoutId)
+  }, [isCopied])
+
+  const copyUrl = async () => {
+    if (!navigator.clipboard) return
+
+    try {
+      await navigator.clipboard.writeText(value)
+      setIsCopied(true)
+    } catch {
+      setIsCopied(false)
+    }
+  }
+
+  const buttonLabel = isCopied ? `${label} copied` : `Copy ${label}`
+
+  return (
+    <Button
+      type="button"
+      size="icon"
+      variant="ghost"
+      className="bg-muted hover:bg-accent h-auto w-8 self-stretch rounded-none border-l"
+      aria-label={buttonLabel}
+      title={buttonLabel}
+      onClick={() => void copyUrl()}
+    >
+      {isCopied ? (
+        <Check className="size-3.5" aria-hidden="true" />
+      ) : (
+        <Copy className="size-3.5" aria-hidden="true" />
+      )}
+    </Button>
+  )
+}
 
 export function GithubOAuthSetupDialog({
   open,
@@ -73,20 +123,25 @@ export function GithubOAuthSetupDialog({
               <dl className="mt-2 space-y-2 text-xs">
                 <div>
                   <dt className="text-muted-foreground">Homepage URL</dt>
-                  <dd>
-                    <code className="bg-muted mt-1 block overflow-x-auto rounded px-2 py-1">
+                  <dd className="bg-muted mt-1 flex items-stretch overflow-hidden rounded">
+                    <code className="min-w-0 flex-1 overflow-x-auto px-2 py-1">
                       {homepageUrl}
                     </code>
+                    <CopyValueButton value={homepageUrl} label="homepage URL" />
                   </dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">
                     Authorization callback URL
                   </dt>
-                  <dd>
-                    <code className="bg-muted mt-1 block overflow-x-auto rounded px-2 py-1">
+                  <dd className="bg-muted mt-1 flex items-stretch overflow-hidden rounded">
+                    <code className="min-w-0 flex-1 overflow-x-auto px-2 py-1">
                       {callbackUrl}
                     </code>
+                    <CopyValueButton
+                      value={callbackUrl}
+                      label="authorization callback URL"
+                    />
                   </dd>
                 </div>
               </dl>
@@ -106,11 +161,17 @@ export function GithubOAuthSetupDialog({
                 Generate a client secret, then add the Client ID and Client
                 Secret to your <code>.env</code> file.
               </p>
-              <code className="bg-muted mt-2 block overflow-x-auto whitespace-pre rounded px-2 py-1 text-xs">
-                {
-                  'OST_GITHUB_ID=YOUR_GITHUB_OAUTH_APP_ID\nOST_GITHUB_SECRET=YOUR_GITHUB_OAUTH_APP_SECRET'
-                }
-              </code>
+              <div className="bg-muted mt-2 flex items-stretch overflow-hidden rounded">
+                <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre px-2 py-1 text-xs">
+                  {
+                    'OST_GITHUB_ID=YOUR_GITHUB_OAUTH_APP_ID\nOST_GITHUB_SECRET=YOUR_GITHUB_OAUTH_APP_SECRET'
+                  }
+                </code>
+                <CopyValueButton
+                  value={'OST_GITHUB_ID=\nOST_GITHUB_SECRET='}
+                  label="environment variables"
+                />
+              </div>
             </div>
           </div>
 
