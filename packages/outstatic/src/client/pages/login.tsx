@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/shadcn/button'
 import { AlertCircleIcon, Mail } from 'lucide-react'
 import { Input } from '@/components/ui/shadcn/input'
 import { UpgradeDialog } from '@/components/ui/outstatic/upgrade-dialog'
-import { ApiKeyLoginDialog } from '@/components/ui/outstatic/api-key-login-dialog'
+import { GithubOAuthSetupDialog } from '@/components/ui/outstatic/github-oauth-setup-dialog'
 import { Badge } from '@/components/ui/shadcn/badge'
 
 type Errors = keyof typeof loginErrors
@@ -66,7 +66,7 @@ export default function Login({
   const [emailSent, setEmailSent] = useState(false)
   const [emailLoading, setEmailLoading] = useState(false)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
+  const [showGithubSetupDialog, setShowGithubSetupDialog] = useState(false)
   const showPlanBadges = !isPro
   const apiBasePath = basePath
     ? `${basePath.replace(/\/+$/, '')}${OUTSTATIC_API_PATH}`
@@ -78,9 +78,9 @@ export default function Login({
     document.title = 'Outstatic | Login'
   }, [])
 
-  const navigateToError = (errorCode: string) => {
-    if (errorCode === 'auth-not-configured') {
-      setShowApiKeyDialog(true)
+  const navigateToError = (errorCode: string, showGithubSetup = false) => {
+    if (errorCode === 'auth-not-configured' && showGithubSetup) {
+      setShowGithubSetupDialog(true)
       return
     }
 
@@ -102,7 +102,7 @@ export default function Login({
           data && typeof data.error === 'string'
             ? data.error
             : 'github-relay-failed'
-        navigateToError(errorCode)
+        navigateToError(errorCode, true)
         return
       }
 
@@ -115,9 +115,9 @@ export default function Login({
         data && typeof data.error === 'string'
           ? data.error
           : 'github-relay-failed'
-      navigateToError(errorCode)
+      navigateToError(errorCode, true)
     } catch {
-      navigateToError('github-relay-failed')
+      navigateToError('github-relay-failed', true)
     } finally {
       setIsLoading(false)
     }
@@ -197,9 +197,9 @@ export default function Login({
 
   return (
     <>
-      <ApiKeyLoginDialog
-        open={showApiKeyDialog}
-        onOpenChange={setShowApiKeyDialog}
+      <GithubOAuthSetupDialog
+        open={showGithubSetupDialog}
+        onOpenChange={setShowGithubSetupDialog}
         basePath={basePath}
       />
       <div id="outstatic">

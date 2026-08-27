@@ -52,9 +52,9 @@ jest.mock('@/components/ui/outstatic/upgrade-dialog', () => ({
   )
 }))
 
-jest.mock('@/components/ui/outstatic/api-key-login-dialog', () => ({
-  ApiKeyLoginDialog: ({ open }: { open: boolean }) => (
-    <div data-testid="api-key-dialog" data-open={String(open)} />
+jest.mock('@/components/ui/outstatic/github-oauth-setup-dialog', () => ({
+  GithubOAuthSetupDialog: ({ open }: { open: boolean }) => (
+    <div data-testid="github-setup-dialog" data-open={String(open)} />
   )
 }))
 
@@ -96,7 +96,7 @@ describe('<Login />', () => {
     expect(screen.queryByText('PRO')).not.toBeInTheDocument()
   })
 
-  it('opens API key dialog when GitHub backend returns auth-not-configured', async () => {
+  it('opens GitHub setup dialog when GitHub backend returns auth-not-configured', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 400,
@@ -114,7 +114,7 @@ describe('<Login />', () => {
     fireEvent.click(githubButton)
 
     await waitFor(() => {
-      expect(screen.getByTestId('api-key-dialog')).toHaveAttribute(
+      expect(screen.getByTestId('github-setup-dialog')).toHaveAttribute(
         'data-open',
         'true'
       )
@@ -228,7 +228,7 @@ describe('<Login />', () => {
     )
   })
 
-  it('opens API key dialog when Google backend returns auth-not-configured', async () => {
+  it('shows the login configuration error when Google auth is not configured', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 400,
@@ -246,11 +246,15 @@ describe('<Login />', () => {
     fireEvent.click(googleButton)
 
     await waitFor(() => {
-      expect(screen.getByTestId('api-key-dialog')).toHaveAttribute(
-        'data-open',
-        'true'
+      expect(pushMock).toHaveBeenCalledWith(
+        '/outstatic?error=auth-not-configured'
       )
     })
+
+    expect(screen.getByTestId('github-setup-dialog')).toHaveAttribute(
+      'data-open',
+      'false'
+    )
   })
 
   it('routes unknown Google failures to google-relay-failed', async () => {

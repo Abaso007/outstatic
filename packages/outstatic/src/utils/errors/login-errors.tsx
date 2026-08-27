@@ -54,8 +54,9 @@ const loginErrors = {
   'auth-not-configured': (
     <>
       Login is not configured. <br />
-      Add <code>OST_GITHUB_ID</code> and <code>OST_GITHUB_SECRET</code>, or set{' '}
-      <code>OUTSTATIC_API_KEY</code> to use GitHub and Google relay login.
+      Add <code>OST_GITHUB_ID</code> and <code>OST_GITHUB_SECRET</code> to use
+      GitHub OAuth. Outstatic Pro users can alternatively set{' '}
+      <code>OUTSTATIC_API_KEY</code> for managed sign-in.
     </>
   ),
   'project-url-not-configured': (
