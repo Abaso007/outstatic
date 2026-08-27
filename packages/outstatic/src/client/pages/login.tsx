@@ -93,8 +93,7 @@ export default function Login({
     router.push(currentUrl.pathname + currentUrl.search)
   }
 
-  const handleGithubLogin = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
+  const startGithubLogin = async () => {
     if (isLoading) return
 
     setLoadingProvider('github')
@@ -127,6 +126,11 @@ export default function Login({
     } finally {
       setLoadingProvider(null)
     }
+  }
+
+  const handleGithubLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    void startGithubLogin()
   }
 
   const handleGoogleLogin = async (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -333,6 +337,7 @@ export default function Login({
                             feature="team"
                             open={showUpgradeDialog}
                             onOpenChange={setShowUpgradeDialog}
+                            onGithubSignIn={() => void startGithubLogin()}
                           >
                             <Button
                               variant="outline"

@@ -41,13 +41,28 @@ jest.mock('@/components/ui/outstatic/loading-background', () => ({
 jest.mock('@/components/ui/outstatic/upgrade-dialog', () => ({
   UpgradeDialog: ({
     children,
-    open = false
+    open = false,
+    onOpenChange,
+    onGithubSignIn
   }: {
     children?: ReactNode
     open?: boolean
+    onOpenChange?: (open: boolean) => void
+    onGithubSignIn?: () => void
   }) => (
     <div data-testid="upgrade-dialog" data-open={String(open)}>
       {children}
+      {open && onGithubSignIn ? (
+        <button
+          type="button"
+          onClick={() => {
+            onOpenChange?.(false)
+            onGithubSignIn()
+          }}
+        >
+          Or sign in with GitHub
+        </button>
+      ) : null}
     </div>
   )
 }))
@@ -343,6 +358,29 @@ describe('<Login />', () => {
 
     await waitFor(() => {
       expect(upgradeDialog).toHaveAttribute('data-open', 'true')
+    })
+  })
+
+  it('starts GitHub sign-in from the Pro dialog alternative', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'auth-not-configured' })
+    })
+
+    render(<Login />)
+
+    fireEvent.focus(screen.getByPlaceholderText(/enter your email/i))
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Or sign in with GitHub' })
+    )
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/outstatic/login')
+      expect(screen.getByTestId('github-setup-dialog')).toHaveAttribute(
+        'data-open',
+        'true'
+      )
     })
   })
 

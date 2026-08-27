@@ -26,7 +26,7 @@ export type UpgradeFeature =
   | 'content-setup'
 
 const headline: Record<UpgradeFeature, string> = {
-  team: 'Unlock Team Collaboration',
+  team: 'Sorry, only with Pro',
   'api-keys': 'Unlock API Keys',
   ai: 'Write faster with AI',
   save: 'Upgrade to save your content',
@@ -80,21 +80,16 @@ const getUpgradeUrl = (
 
 const features = [
   {
-    icon: <Sparkles className="h-5 w-5" />,
-    title: 'AI Completions',
-    description: 'Smart content suggestions and auto-completion powered by AI'
+    icon: <Mail className="h-5 w-5" />,
+    title: 'Email and Google Authentication',
+    description:
+      'Email and Google authentication for seamless access to your projects'
   },
   {
     icon: <Users className="h-5 w-5" />,
     title: 'Team Collaboration',
     description:
       'Add team members to your projects and manage their access to your projects'
-  },
-  {
-    icon: <Mail className="h-5 w-5" />,
-    title: 'Email and Google Authentication',
-    description:
-      'Email and Google authentication for seamless access to your projects'
   }
 ]
 
@@ -125,13 +120,15 @@ export function UpgradeDialog({
   children,
   feature = 'team',
   accountSlug,
-  dashboardRoute
+  dashboardRoute,
+  onGithubSignIn
 }: React.PropsWithChildren<{
   open?: boolean
   onOpenChange?: (open: boolean) => void
   feature?: UpgradeFeature
   accountSlug?: string
   dashboardRoute?: string
+  onGithubSignIn?: () => void
 }>) {
   const [isOpen, setIsOpen] = useState(open)
   const [hasMounted, setHasMounted] = useState(false)
@@ -226,6 +223,21 @@ export function UpgradeDialog({
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+          {onGithubSignIn ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                setIsOpen(false)
+                onOpenChange?.(false)
+                onGithubSignIn()
+              }}
+            >
+              Or sign in with GitHub
+            </Button>
+          ) : null}
         </div>
         {feature === 'save' ? (
           <p className="text-muted-foreground text-sm text-center">
